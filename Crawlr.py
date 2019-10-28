@@ -69,6 +69,7 @@ def pexit(printit=''):
     exit(0)
 
 inserted_count = 0
+
 def getevent(eventid):
     global inserted_count
     try:
@@ -91,27 +92,28 @@ def getevent(eventid):
         event_date_place = get_date_place(tree)
         event_photo = get_photo(tree)
 
-        '''with open(file, "w", encoding="utf-8") as text_file:
-            print(browser.parsed.encode(), file=text_file)
-        print('Opening browser...')
-        webbrowser.open_new_tab(file)'''
+        try:
 
-        if " dates left" in event_date_place[0]:
-            print(' - \033[1;31;0mError while getting date:\033[1;0;0m')
-            print(event_date_place)
-            dateto = None
-            datefrom = None
-        else:
-            splitted = event_date_place[0].split(' – ', 1)
-            if len(splitted) < 2:
-                splitted = event_date_place[0].split(' - ', 1) # – - not equal!!!
-            if len(splitted) < 2:
-                print(' - \033[1;31;0mError while splitting date: \033[1;0;0m' + event_date_place[0])
+            if " dates left" in event_date_place[0]:
+                print(' - \033[1;31;0mError while getting date:\033[1;0;0m')
+                print(event_date_place)
                 dateto = None
                 datefrom = None
             else:
-                datefrom = timestring.Date(splitted[0]).date
-                dateto = timestring.Date(splitted[0][:-4] + splitted[1]).date
+                splitted = event_date_place[0].split(' – ', 1)
+                if len(splitted) < 2:
+                    splitted = event_date_place[0].split(' - ', 1) # – - not equal!!!
+                if len(splitted) < 2:
+                    print(' - \033[1;31;0mError while splitting date: \033[1;0;0m' + event_date_place[0])
+                    dateto = None
+                    datefrom = None
+                else:
+                    datefrom = timestring.Date(splitted[0]).date
+                    dateto = timestring.Date(splitted[0][:-4] + splitted[1]).date
+        except Exception as e:
+            print(e)
+            dateto = None
+            datefrom = None
 
         '''datefrom = "2018-01-01 01:01:01"
         dateto = "2018-01-01 01:01:01"'''
