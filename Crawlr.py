@@ -321,7 +321,7 @@ def getpage(page):
 
 def listpages():
     mycursor = connection.cursor()
-    nowplushour = datetime.datetime.now() + datetime.timedelta(hours=-5)
+    nowplushour = datetime.datetime.now() + datetime.timedelta(hours=-1)
     mycursor.execute("SELECT page FROM pages WHERE lastindex < %s OR lastindex IS NULL", nowplushour)
     pages = []
     for page in mycursor:
@@ -341,6 +341,7 @@ connection = pymysql.connect(host = CONFIG.MYSQL_HOST,
 
 listpages = listpages()
 for pageid in listpages:
+    print("Getting page " + str(pageid))
     pageevents = getpage(pageid)
     for eventid in pageevents:
         getevent(eventid)
