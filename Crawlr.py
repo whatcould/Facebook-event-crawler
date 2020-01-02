@@ -342,13 +342,14 @@ for pageid in listpages:
             getevent(eventid)
         else:
             print('Banned event: '+eventid)
+        getevent(eventid)
 
-nowminday = datetime.datetime.now() + datetime.timedelta(days=-1)
-with connection.cursor() as cursor:
-    cursor.execute("DELETE from events WHERE datefrom < %s AND dateto < %s", (nowminday, nowminday))
-    result = cursor.rowcount
-    print(str(result) + " old row deleted")
-    connection.commit()
+# nowminday = datetime.datetime.now() + datetime.timedelta(days=-1)
+# with connection.cursor() as cursor:
+#     cursor.execute("DELETE from events WHERE datefrom < %s AND dateto < %s", (nowminday, nowminday))
+#     result = cursor.rowcount
+#     print(str(result) + " old row deleted")
+#     connection.commit()
 
 connection.close()
 
