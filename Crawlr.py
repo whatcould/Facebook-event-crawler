@@ -93,12 +93,16 @@ def getevent(eventid):
         event_photo = get_photo(tree)
 
         try:
-
             if " dates left" in event_date_place[0]:
                 print(' - \033[1;31;0mError while getting date:\033[1;0;0m')
                 print(event_date_place)
                 dateto = None
                 datefrom = None
+            if " at " in event_date_place[0]:
+                # Ignore for now
+                return
+                splitted = event_date_place[0].split(' at ', 1)
+                weekday = splitted[0]
             else:
                 splitted = event_date_place[0].split(' – ', 1)
                 if len(splitted) < 2:
@@ -187,7 +191,7 @@ def getevent(eventid):
         connection.commit()
         inserted_count += 0
         print('')
-        
+
     except Exception as e: # Catch failture
         print('\nGetevent error')
         logging.exception("message")
@@ -204,9 +208,10 @@ def get_date_place(tree):
     return event_date_place
 
 
-
 def get_event_ago(tree):
     event_ago_temp = tree.xpath('//div[@id="event_summary"]/div/div/table/tbody/tr/td[2]/dd/div/text()') # [0] == ago (3 days ago)   [1] == location (Brusznyai út 2., Veszprém, 8200)
+    print('event_ago_temp: ')
+    print(event_ago_temp)
     if (len(event_ago_temp) == 3):
         event_ago = [event_ago_temp[0]+event_ago_temp[1],event_ago_temp[2]]
     else:
@@ -338,10 +343,6 @@ listpages = listpages()
 for pageid in listpages:
     pageevents = getpage(pageid)
     for eventid in pageevents:
-        if (eventid != '2097615280296927') & (eventid != '980689918806985') & (eventid != '773389126335451'):
-            getevent(eventid)
-        else:
-            print('Banned event: '+eventid)
         getevent(eventid)
 
 # nowminday = datetime.datetime.now() + datetime.timedelta(days=-1)
