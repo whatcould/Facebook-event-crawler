@@ -70,6 +70,12 @@ def pexit(printit=''):
 
 inserted_count = 0
 
+
+dow = dict(zip('monday tuesday wednesday thursday friday saturday sunday'.split(), range(7)))
+def getDateFromDayOf(dateTimeObj, reqDayOf):
+    weekday = dateTimeObj.weekday()
+    return dateTimeObj + datetime.timedelta(days=(dow[reqDayOf.lower()]-weekday-1)%7+1)
+
 def getevent(eventid):
     global inserted_count
     try:
@@ -98,12 +104,14 @@ def getevent(eventid):
                 print(event_date_place)
                 dateto = None
                 datefrom = None
-            if " at " in event_date_place[0]:
-                # Ignore for now
-                return
-                splitted = event_date_place[0].split(' at ', 1)
-                weekday = splitted[0]
-            else:
+            if "Tomorrow" in event_date_place[0]:
+                split = event_date_place[0].split(' at ', 1)
+                target_date = datetime.datetime.now() + datetime.timedelta(days=1)
+                times = split[1].split(' – ')
+                datefrom = timestring.Date(f"{times[0]} {target_date.strftime('%B %d, %Y')}").date
+                dateto = timestring.Date(f"{times[1]} {target_date.strftime('%B %d, %Y')}").date
+            # Saturday, January 25, 2020 at 12 PM – 2:30 PM
+            elif ", 202" in event_date_place[0]:
                 splitted = event_date_place[0].split(' – ', 1)
                 if len(splitted) < 2:
                     splitted = event_date_place[0].split(' - ', 1) # – - not equal!!!
@@ -114,6 +122,17 @@ def getevent(eventid):
                 else:
                     datefrom = timestring.Date(splitted[0]).date
                     dateto = timestring.Date(splitted[0][:-4] + splitted[1]).date
+            # Monday at 6 PM – 9 PM
+            else:
+                split = event_date_place[0].split(' at ', 1)
+                print(split)
+                print(split)
+                target_date = getDateFromDayOf(datetime.datetime.now(), split[0])
+                times = split[1].split(' – ')
+                datefrom = timestring.Date(f"{times[0]} {target_date.strftime('%B %d, %Y')}").date
+                dateto = timestring.Date(f"{times[1]} {target_date.strftime('%B %d, %Y')}").date
+                print(datefrom)
+                print(dateto)
         except Exception as e:
             print(e)
             dateto = None
