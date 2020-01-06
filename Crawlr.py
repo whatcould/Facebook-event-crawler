@@ -104,7 +104,14 @@ def getevent(eventid):
                 print(event_date_place)
                 dateto = None
                 datefrom = None
-            if "Tomorrow" in event_date_place[0]:
+            elif "Today" in event_date_place[0]:
+                split = event_date_place[0].split(' at ', 1)
+                target_date = datetime.datetime.now()
+                times = split[1].split(' – ')
+                datefrom = timestring.Date(f"{times[0]} {target_date.strftime('%B %d, %Y')}").date
+                dateto = timestring.Date(f"{times[1]} {target_date.strftime('%B %d, %Y')}").date
+            # Tomorrow at 12 PM – 2:30 PM
+            elif "Tomorrow" in event_date_place[0]:
                 split = event_date_place[0].split(' at ', 1)
                 target_date = datetime.datetime.now() + datetime.timedelta(days=1)
                 times = split[1].split(' – ')
