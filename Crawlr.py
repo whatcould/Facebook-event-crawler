@@ -1,5 +1,6 @@
 import datetime
 import webbrowser
+import pytz
 from time import sleep
 from requests import Session
 from robobrowser import RoboBrowser
@@ -97,6 +98,8 @@ def getevent(eventid):
         event_title = get_title(tree)
         event_date_place = get_date_place(tree)
         event_photo = get_photo(tree)
+        tz = pytz.timezone('US/Eastern')
+
 
         try:
             if " dates left" in event_date_place[0]:
@@ -106,14 +109,14 @@ def getevent(eventid):
                 datefrom = None
             elif "Today" in event_date_place[0]:
                 split = event_date_place[0].split(' at ', 1)
-                target_date = datetime.datetime.now()
+                target_date = datetime.datetime.now(tz)
                 times = split[1].split(' – ')
                 datefrom = timestring.Date(f"{times[0]} {target_date.strftime('%B %d, %Y')}").date
                 dateto = timestring.Date(f"{times[1]} {target_date.strftime('%B %d, %Y')}").date
             # Tomorrow at 12 PM – 2:30 PM
             elif "Tomorrow" in event_date_place[0]:
                 split = event_date_place[0].split(' at ', 1)
-                target_date = datetime.datetime.now() + datetime.timedelta(days=1)
+                target_date = datetime.datetime.now(tz) + datetime.timedelta(days=1)
                 times = split[1].split(' – ')
                 datefrom = timestring.Date(f"{times[0]} {target_date.strftime('%B %d, %Y')}").date
                 dateto = timestring.Date(f"{times[1]} {target_date.strftime('%B %d, %Y')}").date
