@@ -8,6 +8,7 @@ from lxml import html
 from urllib import parse
 import pymysql.cursors
 import timestring
+import dateutil.parser as dp
 import json
 import requests
 from requests.auth import HTTPBasicAuth
@@ -101,6 +102,23 @@ def getevent(eventid):
         tz = pytz.timezone('US/Eastern')
 
 
+        # https://stackoverflow.com/questions/1703546/parsing-date-time-string-with-timezone-abbreviated-name-in-python
+        tz_str = '''-12 Y
+        -11 X NUT SST
+        -10 W CKT HAST HST TAHT TKT
+        -9 V AKST GAMT GIT HADT HNY
+        -8 U AKDT CIST HAY HNP PST PT
+        -7 T HAP HNR MST PDT
+        -6 S CST EAST GALT HAR HNC MDT
+        -5 R CDT COT EASST ECT EST ET HAC HNE PET
+        -4 Q AST BOT CLT COST EDT FKT GYT HAE HNA PYT'''
+
+        tzd = {}
+        for tz_descr in map(str.split, tz_str.split('\n')):
+            tz_offset = int(float(tz_descr[0]) * 3600)
+            for tz_code in tz_descr[1:]:
+                tzd[tz_code] = tz_offset
+
         try:
             if " dates left" in event_date_place[0]:
                 print(' - \033[1;31;0mError while getting date:\033[1;0;0m')
@@ -122,21 +140,31 @@ def getevent(eventid):
                 dateto = timestring.Date(f"{times[1]} {target_date.strftime('%B %d, %Y')}").date
             # Saturday, January 25, 2020 at 12 PM – 2:30 PM
             elif ", 202" in event_date_place[0]:
-                splitted = event_date_place[0].split(' – ', 1)
-                if len(splitted) < 2:
-                    splitted = event_date_place[0].split(' - ', 1) # – - not equal!!!
-                if len(splitted) < 2:
+                date_split = event_date_place[0].split(' at ', 1)
+                time_split = date_split[1].split(' – ', 1)
+                if len(date_split) < 2:
+                    # Not sure what this does
+                    date_split = event_date_place[0].split(' - ', 1)
+                if len(date_split) < 2:
                     print(' - \033[1;31;0mError while splitting date: \033[1;0;0m' + event_date_place[0])
                     dateto = None
                     datefrom = None
                 else:
-                    datefrom = timestring.Date(splitted[0]).date
-                    dateto = timestring.Date(splitted[0][:-4] + splitted[1]).date
+                    # if "EDT" in time_split[1]:
+                    #     time_split[0] = time_split[0] + ' EDT'
+                    # elif "EST" in time_split[1]:
+                    #     time_split[0] = time_split[0] + ' EST'
+                    # time_split[1] = time_split[1].replace('EDT', 'EST')
+                    datefrom = dp.parse(date_split[0] + " at " + time_split[0], tzinfos=tzd)
+                    dateto = dp.parse(date_split[0] + " at " + time_split[1], tzinfos=tzd)
+                    if "EDT" in time_split[1]:
+                        datefrom = datefrom + datetime.timedelta(hours=-1)
+                        dateto = dateto + datetime.timedelta(hours=-1)
+                    print("\n***** TO:")
+                    print(dateto)
             # Monday at 6 PM – 9 PM
             else:
                 split = event_date_place[0].split(' at ', 1)
-                print(split)
-                print(split)
                 target_date = getDateFromDayOf(datetime.datetime.now(), split[0])
                 times = split[1].split(' – ')
                 datefrom = timestring.Date(f"{times[0]} {target_date.strftime('%B %d, %Y')}").date
