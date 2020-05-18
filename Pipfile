@@ -7,10 +7,12 @@ verify_ssl = true
 
 [packages]
 robobrowser = "*"
+Werkzeug = "==0.16.1"
 requests = "*"
 pymysql = "*"
 lxml = "*"
 timestring = "*"
+python-dateutil = "*"
 
 [requires]
 python_version = "3.7"
